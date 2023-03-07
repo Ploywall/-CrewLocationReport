@@ -1,0 +1,36 @@
+name: WRMAutomateTest
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3.6.0
+      with:
+        node-version: 16
+      
+    - name: Setup .NET SDK
+      run: |
+        choco install dotnet-sdk -y
+        
+    - name: Build and test
+      run: |
+        dotnet restore
+        dotnet test --filter "FullyQualifiedName=WRMAutotests.Tests.WebUI.EndToEndTests.E2E001.E2E001_Test"
+
+    - name: Zip files in folder
+      run: |
+        7z a -tzip allure-results.zip D:\a\Storm-automation-ui-test\Storm-automation-ui-test\WRMAutotests\bin\Debug\net6.0\allure-results
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: allure-results
+        path: allure-results.zip
